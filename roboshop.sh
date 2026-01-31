@@ -3,7 +3,7 @@
 
 SG_ID="sg-0397ae3d261c3d2e4" # Replace with your actual Security Group ID
 AMI_ID="ami-0220d79f3f480ecf5" # Replace with your desired AMI ID
-Zone_ID="0760197PITCJBO2DZXK" # Replace with your actual Hosted Zone ID
+Zone_ID="Z0760197PITCJBO2DZXK" # Replace with your actual Hosted Zone ID
 Domain_Name="devopspractice08.online" # Replace with your actual Domain Name
 
 for instance in "$@"
