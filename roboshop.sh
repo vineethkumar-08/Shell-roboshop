@@ -40,7 +40,7 @@ for instance in "$@"
         --hosted-zone-id "$Zone_ID" \
         --change-batch '
         {
-            "comment": "Updating record",
+            "Comment": "Updating record",
             "Changes": [
             {
                 "Action": "UPSERT",
