@@ -25,7 +25,7 @@ do
            --instance-ids $instance_ID\ 
            --query 'Reservations[0].Instances[0].PrivateIpAddress' \
         )
-        else
+        echo "The IP address  $ip"
 
 
 
