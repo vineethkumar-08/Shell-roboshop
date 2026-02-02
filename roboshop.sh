@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SG_ID="sg-0397ae3d261c3d2e4" # replace with your ID
-AMI_ID="ami-0220d79f3f480ecf5"
+AMI_ID="ami-0220d79f3f480ecf5" # replace with your AMI ID
 ZONE_ID="Z05013202FKF0ZL12WAOP"
 DOMAIN_NAME="devopspractice08.online"
 
@@ -61,5 +61,8 @@ do
     '
 
     echo "record updated for $instance"
+    else
+  echo "❌ failed to update record for $instance"
+  exit 1
 
 done
