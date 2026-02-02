@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SG_ID="sg-076ec9ad23dab2b28" # replace with your ID
+SG_ID="sg-0397ae3d261c3d2e4" # replace with your ID
 AMI_ID="ami-0220d79f3f480ecf5"
 ZONE_ID="Z05013202FKF0ZL12WAOP"
 DOMAIN_NAME="devopspractice08.online"
@@ -22,8 +22,8 @@ do
             --query 'Reservations[].Instances[].PublicIpAddress' \
             --output text
         )
-        RECORD_NAME="$DOMAIN_NAME" # 
-devopspractice08.online
+        RECORD_NAME="$DOMAIN_NAME" # devopspractice08.online
+
     else
         IP=$(
             aws ec2 describe-instances \
@@ -32,7 +32,7 @@ devopspractice08.online
             --output text
         )
         RECORD_NAME="$instance.$DOMAIN_NAME" # mongodb.
-devopspractice08.online
+
     fi
 
     echo "IP Address: $IP"
