@@ -7,6 +7,8 @@ R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
+SCRIPT_DIR=$PWD
+MONGODB_HOST=mongodb.daws88s.online
 
 if [ $USERID -ne 0 ]; then
     echo -e "$R Please run this script with root user access $N" | tee -a $LOGS_FILE
@@ -24,41 +26,61 @@ VALIDATE(){
     fi
 }
 
-dnf module disable nodejs -y
+dnf module disable nodejs -y &>>$LOGS_FILE
 VALIDATE $? "Disabling NodeJS Default version"
 
-dnf module enable nodejs:20 -y
+dnf module enable nodejs:20 -y &>>$LOGS_FILE
 VALIDATE $? "Enabling NodeJS 20"
 
-dnf install nodejs -y
+dnf install nodejs -y &>>$LOGS_FILE
 VALIDATE $? "Install NodeJS"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop 
-VALIDATE $? "Creating system user"
+id roboshop &>>$LOGS_FILE
+if [ $? -ne 0 ]; then
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOGS_FILE
+    VALIDATE $? "Creating system user"
+else
+    echo -e "Roboshop user already exist ... $Y SKIPPING $N"
+fi
 
-mkdir /app 
+mkdir -p /app 
 VALIDATE $? "Creating app directory"
 
-curl -L -o /tmp/user.zip https://roboshop-artifacts.s3.amazonaws.com/user-v3.zip 
+curl -o /tmp/user.zip https://roboshop-artifacts.s3.amazonaws.com/user-v3.zip  &>>$LOGS_FILE
 VALIDATE $? "Downloading user code"
 
-cd /app 
+cd /app
 VALIDATE $? "Moving to app directory"
 
-unzip /tmp/user.zip
+rm -rf /app/*
+VALIDATE $? "Removing existing code"
+
+unzip /tmp/user.zip &>>$LOGS_FILE
 VALIDATE $? "Uzip user code"
 
-cd /app 
-npm install 
+npm install  &>>$LOGS_FILE
+VALIDATE $? "Installing dependencies"
 
 cp $SCRIPT_DIR/user.service /etc/systemd/system/user.service
-VALIDATE $? "Created systemctl service for user"
+VALIDATE $? "Created systemctl service"
 
 systemctl daemon-reload
-VALIDATE $? "Daemon Reload"
-
-systemctl enable user 
-VALIDATE $? "Enabling user service"
-
+systemctl enable user  &>>$LOGS_FILE
 systemctl start user
-VALIDATE $? "Starting user service"
+VALIDATE $? "Starting and enabling user"
+
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
+dnf install mongodb-mongosh -y &>>$LOGS_FILE
+
+INDEX=$(mongosh --host $MONGODB_HOST --quiet  --eval 'db.getMongo().getDBNames().indexOf("user")')
+
+if [ $INDEX -le 0 ]; then
+    mongosh --host $MONGODB_HOST </app/db/master-data.js
+    VALIDATE $? "Loading products"
+else
+    echo -e "Products already loaded ... $Y SKIPPING $N"
+fi
+
+
+systemctl restart user
+VALIDATE $? "Restarting user"
