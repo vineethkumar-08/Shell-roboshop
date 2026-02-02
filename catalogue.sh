@@ -48,10 +48,28 @@ mkdir -p /app
 VALIDATE $? "Creating application directory"
 
 curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip  &>> $LOGS_FILE
-cd /app 
-unzip /tmp/catalogue.zip &>> $LOGS_FILE
-VALIDATE $? "Extracting application content"
+VALIDATE $? "Downloading catalogue application content"
 
 cd /app 
-npm install &>> $LOGS_FILE
+VALIDATE $? "Changing directory to /app"
+
+
+unzip /tmp/catalogue.zip &>> $LOGS_FILE
+VALIDATE $? "unzip catalogue  content"
+
+
+npm install &>> $LOGS_FILE 
 VALIDATE $? "Installing application dependencies"
+
+cp catalogue.service /etc/systemd/system/catalogue.service 
+VALIDATE $? "created systemctl service file"
+
+systemctl daemon-reload
+VALIDATE $? "Reloading systemctl daemon"
+
+systemctl enable catalogue  
+VALIDATE $? "Enabling catalogue service"
+
+
+systemctl start catalogue
+VALIDATE $? "Starting catalogue service"
