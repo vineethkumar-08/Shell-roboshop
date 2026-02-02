@@ -61,8 +61,6 @@ do
     '
 
     echo "record updated for $instance"
-    else
-  echo "❌ failed to update record for $instance"
-  exit 1
+   
 
 done
