@@ -8,7 +8,7 @@ G="\e[32m"
 Y="\e[33m"    
 N="\e[0m"    
 
-SCRIPT_DIR=$pwd
+SCRIPT_DIR=$(pwd)
 MONGODB_HOST='mongodb.devopspractice08.online'
 
 if [ $USERID -ne 0 ] ; then 
@@ -64,10 +64,9 @@ VALIDATE $? "unzip catalogue  content"
 
 
 npm install &>> $LOGS_FILE 
-VALIDATE $? "Installing applicat
-ion dependencies"
+VALIDATE $? "Installing application dependencies"
 
-cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service 
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
 VALIDATE $? "created systemctl service file"
 
 systemctl daemon-reload
@@ -76,16 +75,16 @@ systemctl start catalogue
 
 
 
-cp $SCRIPT_DIR/mongo.service /etc/yum.repos.d/mongo.repo
-
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
 dnf install mongodb-mongosh -y &>> $LOGS_FILE
 
 
 
-INDEX=$(mongosh --host $MONGODB_HOST --eval --quiet 'db.getmongo().getDBnames().indexof("catalogue")' )
+INDEX=$(mongosh --host $MONGODB_HOST --quiet --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
 if [ $INDEX -ne 0  ]; then
-mongosh --host $MONGODB_HOST <app/db/master-data.js
+mongosh --host $MONGODB_HOST </app/db/master-data.js
 VALIDATE $? "Loading catalogue schema"
+
 else    
 echo -e " catalogue schema already exists...$Y SKIPPING $N" 
 fi
