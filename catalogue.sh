@@ -71,22 +71,25 @@ cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
 VALIDATE $? "created systemctl service file"
 
 systemctl daemon-reload
-VALIDATE $? "Reloading systemctl daemon"
-
-systemctl enable catalogue  
-VALIDATE $? "Enabling catalogue service"
-
-
+systemctl enable catalogue  &>> $LOGS_FILE
 systemctl start catalogue
-VALIDATE $? "Starting catalogue service"
+
 
 
 cp $SCRIPT_DIR/mongo.service /etc/yum.repos.d/mongo.repo
 
 dnf install mongodb-mongosh -y &>> $LOGS_FILE
-VALIDATE $? "Installing Mongodb client"
 
 
-mongosh --host $MONGODB_HOST </app/db/master-data.js &>> $LOGS_FILE
-VALIDATE $? "Loading catalogue schema to Mongodb"
 
+INDEX=$(mongosh --host $MONGODB_HOST --eval --quiet 'db.getmongo().getDBnames().indexof("catalogue")' )
+if [ $INDEX -ne 0  ]; then
+mongosh --host $MONGODB_HOST <app/db/master-data.js
+VALIDATE $? "Loading catalogue schema"
+else    
+echo -e " catalogue schema already exists...$Y SKIPPING $N" 
+fi
+
+
+systemctl restart catalogue 
+VALIDATE $? "Restarting catalogue service"
