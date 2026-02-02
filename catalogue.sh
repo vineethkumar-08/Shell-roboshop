@@ -1,7 +1,7 @@
 #!/bin/bash
  USERID=$(id -u)
 LOGS_FOLDER="/var/logs/shell-roboshop"  #defining logs folder path
-LOGS_FILE="$LOGS_FOLDER/$0.log"   #defining log file path
+LOGS_FILE="$LOGS_FOLDER/catalogue.log"   #defining log file path
 
 R="\e[31m"   
 G="\e[32m"   
@@ -77,16 +77,13 @@ systemctl start catalogue
 
 cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
 dnf install mongodb-mongosh -y &>> $LOGS_FILE
+VALIDATE $? "Installing Mongodb client"
 
-
-
-INDEX=$(mongosh --host $MONGODB_HOST --quiet --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
-if [ $INDEX -ne 0  ]; then
-mongosh --host $MONGODB_HOST </app/db/master-data.js
-VALIDATE $? "Loading catalogue schema"
-
-else    
-echo -e " catalogue schema already exists...$Y SKIPPING $N" 
+if [ "$INDEX" -lt 0 ]; then
+  mongosh --host $MONGODB_HOST </app/db/master-data.js
+  VALIDATE $? "Loading catalogue schema"
+else
+  echo -e " catalogue schema already exists...$Y SKIPPING $N" | tee -a $LOGS_FILE
 fi
 
 
