@@ -1,70 +1,63 @@
 #!/bin/bash
 
+SG_ID="sg-076ec9ad23dab2b28" # replace with your ID
+AMI_ID="ami-0220d79f3f480ecf5"
+ZONE_ID="Z05013202FKF0ZL12WAOP"
+DOMAIN_NAME="daws88s.online"
 
-SG_ID="sg-0397ae3d261c3d2e4" # Replace with your actual Security Group ID
-AMI_ID="ami-0220d79f3f480ecf5" # Replace with your desired AMI ID
-Zone_ID="Z0760197PITCJBO2DZXK" # Replace with your actual Hosted Zone ID
-Domain_Name="devopspractice08.online" # Replace with your actual Domain Name
-
-for instance in "$@"
- do
-    instance_ID=$(aws ec2 run-instances \
-        --image-id "$AMI_ID" \
-        --instance-type t3.micro \
-        --security-group-ids "$SG_ID" \
-        --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance}]" \
-        --query 'Instances[0].InstanceId' \
-        --output text)
+for instance in $@
+do
+    INSTANCE_ID=$( aws ec2 run-instances \
+    --image-id $AMI_ID \
+    --instance-type "t3.micro" \
+    --security-group-ids $SG_ID \
+    --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$instance}]" \
+    --query 'Instances[0].InstanceId' \
+    --output text )
 
     if [ $instance == "frontend" ]; then
-        ip=$(
+        IP=$(
             aws ec2 describe-instances \
-            --instance-ids "$instance_ID" \
-            --query 'Reservations[0].Instances[0].PublicIpAddress' \
-            --output text)
-
-        RECORD_NAME="$Domain_Name"
+            --instance-ids $INSTANCE_ID \
+            --query 'Reservations[].Instances[].PublicIpAddress' \
+            --output text
+        )
+        RECORD_NAME="$DOMAIN_NAME" # daws88s.online
     else
-        ip=$(aws ec2 describe-instances \
-            --instance-ids "$instance_ID" \
-            --query 'Reservations[0].Instances[0].PrivateIpAddress' \
-            --output text)
-
-        RECORD_NAME="$instance.$Domain_Name" # devopspractice08.online
+        IP=$(
+            aws ec2 describe-instances \
+            --instance-ids $INSTANCE_ID \
+            --query 'Reservations[].Instances[].PrivateIpAddress' \
+            --output text
+        )
+        RECORD_NAME="$instance.$DOMAIN_NAME" # mongodb.daws88s.online
     fi
 
-
-    echo "The IP address: $ip"
+    echo "IP Address: $IP"
 
     aws route53 change-resource-record-sets \
-        --hosted-zone-id "$Zone_ID" \
-        --change-batch '
-        {
-            "Comment": "Updating record",
-            "Changes": [
+    --hosted-zone-id $ZONE_ID \
+    --change-batch '
+    {
+        "Comment": "Updating record",
+        "Changes": [
             {
-                "Action": "UPSERT",
-                "ResourceRecordSet": {
-                    "Name": "'"$RECORD_NAME"'",
-                    "Type": "A",
-                    "TTL": 1,
-                    "ResourceRecords": 
-                    [
-                    {
-                      "Value": "'"$ip"'"
-                    }
-                    ]
+            "Action": "UPSERT",
+            "ResourceRecordSet": {
+                "Name": "'$RECORD_NAME'",
+                "Type": "A",
+                "TTL": 1,
+                "ResourceRecords": [
+                {
+                    "Value": "'$IP'"
                 }
+                ]
             }
-            ]
-        }
-        '
+            }
+        ]
+    }
+    '
 
-    
-    echo "Record created for $instance"
-
-
-
-
+    echo "record updated for $instance"
 
 done
