@@ -2,7 +2,7 @@
 
 SG_ID="sg-0397ae3d261c3d2e4" # replace with your ID
 AMI_ID="ami-0220d79f3f480ecf5" # replace with your AMI ID
-ZONE_ID="Z05013202FKF0ZL12WAOP"
+ZONE_ID="Z0760197PITCJBO2DZXK" # replace with your hosted zone ID
 DOMAIN_NAME="devopspractice08.online"
 
 for instance in $@
