@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 USERID=$(id -u)
@@ -81,6 +80,7 @@ if [ $INDEX -le 0 ]; then
 else
     echo -e "Products already loaded ... $Y SKIPPING $N"
 fi
+
 
 systemctl restart catalogue
 VALIDATE $? "Restarting catalogue"
