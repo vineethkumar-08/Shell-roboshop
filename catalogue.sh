@@ -8,6 +8,9 @@ G="\e[32m"
 Y="\e[33m"    
 N="\e[0m"    
 
+SCRIPT_DIR=$pwd
+MONGODB_HOST='mongodb.devopspractice08.online'
+
 if [ $USERID -ne 0 ] ; then 
     echo "$R Please run this script with root acess $N" | tee -a $LOGS_FILE     #run as root user 
     exit 1 # exit scode
@@ -61,9 +64,10 @@ VALIDATE $? "unzip catalogue  content"
 
 
 npm install &>> $LOGS_FILE 
-VALIDATE $? "Installing application dependencies"
+VALIDATE $? "Installing applicat
+ion dependencies"
 
-cp catalogue.service /etc/systemd/system/catalogue.service 
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service 
 VALIDATE $? "created systemctl service file"
 
 systemctl daemon-reload
@@ -75,3 +79,14 @@ VALIDATE $? "Enabling catalogue service"
 
 systemctl start catalogue
 VALIDATE $? "Starting catalogue service"
+
+
+cp $SCRIPT_DIR/mongo.service /etc/yum.repos.d/mongo.repo
+
+dnf install mongodb-mongosh -y &>> $LOGS_FILE
+VALIDATE $? "Installing Mongodb client"
+
+
+mongosh --host $MONGODB_HOST </app/db/master-data.js &>> $LOGS_FILE
+VALIDATE $? "Loading catalogue schema to Mongodb"
+
