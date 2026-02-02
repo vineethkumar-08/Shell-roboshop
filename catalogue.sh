@@ -54,7 +54,7 @@ cd /app
 VALIDATE $? "Changing directory to /app"
 
 
-unzip /tmp/catalogue.zip &>> $LOGS_FILE
+unzip -o /tmp/catalogue.zip &>> $LOGS_FILE
 VALIDATE $? "unzip catalogue  content"
 
 
