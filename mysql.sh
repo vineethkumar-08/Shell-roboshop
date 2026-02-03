@@ -31,13 +31,6 @@ systemctl enable mysqld &>>$LOGS_FILE
 systemctl start mysqld  
 VALIDATE $? "Enable and start mysql"
 
-mysql -u root -e "SELECT 1" &>>$LOGS_FILE
-if [ $? -ne 0 ]; then
-    mysql -u root <<EOF
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'RoboShop@1';
-FLUSH PRIVILEGES;
-EOF
-    VALIDATE $? "Setting MySQL root password"
-else
-    echo -e "MySQL root password already set ... $Y SKIPPING $N"
-fi
+# get the password from user
+mysql_secure_installation --set-root-pass RoboShop@1
+VALIDATE $? "Setup root password"
