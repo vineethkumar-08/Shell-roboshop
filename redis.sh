@@ -2,7 +2,7 @@
 
 USERID=$(id -u)
 LOGS_FOLDER="/var/log/shell-roboshop"
-LOGS_FILE="$LOGS_FOLDER/$0.log"
+LOGS_FILE="$LOGS_FOLDER/redis.log"
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
@@ -27,22 +27,22 @@ VALIDATE(){
 dnf module disable redis -y &>>$LOGS_FILE
 VALIDATE $? "Disabling Redis Default version"
 
-dnf module enable redis:7 -y    &>>$LOGS_FILE
+dnf module enable redis:7 -y &>>$LOGS_FILE
 VALIDATE $? "Enabling Redis 7"
 
 dnf install redis -y &>>$LOGS_FILE
 VALIDATE $? "Installing Redis"
 
-# Allow remote connections
+# Update listen address
 sed -i 's/^bind .*/bind 0.0.0.0/' /etc/redis/redis.conf
 VALIDATE $? "Updating Redis bind address"
 
-# Disable protected mode (lowercase is mandatory)
+# Disable protected mode (DOCUMENT REQUIRED)
 sed -i 's/^protected-mode .*/protected-mode no/' /etc/redis/redis.conf
 VALIDATE $? "Disabling Redis protected mode"
 
-systemctl enable redis  &>>$LOGS_FILE
+systemctl enable redis &>>$LOGS_FILE
 VALIDATE $? "Enabling Redis Service"
 
-systemctl start redis  &>>$LOGS_FILE
+systemctl restart redis &>>$LOGS_FILE
 VALIDATE $? "Starting Redis Service"
