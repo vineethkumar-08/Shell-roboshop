@@ -32,9 +32,9 @@ VALIDATE $? "Installing Python3 and dependencies"
 id roboshop &>>$LOGS_FILE
 if [ $? -ne 0 ]; then
     useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOGS_FILE
-    VALIDATE $? "Creating system user"
+    VALIDATE $? "Creating roboshop user"
 else
-    echo -e "Roboshop user already exist ... $Y SKIPPING $N"
+    echo -e "roboshop user already exists ... SKIPPING"
 fi
 
 mkdir -p /app 
@@ -48,6 +48,9 @@ VALIDATE $? "Moving to app directory"
 
 rm -rf /app/*
 VALIDATE $? "Removing existing code"
+
+dnf install unzip -y &>>$LOGS_FILE
+VALIDATE $? "Installing unzip"
 
 unzip /tmp/payments.zip &>>$LOGS_FILE
 VALIDATE $? "Uzip payments code"
