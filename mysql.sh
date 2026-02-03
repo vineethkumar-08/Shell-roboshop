@@ -2,7 +2,7 @@
 
 USERID=$(id -u)
 LOGS_FOLDER="/var/log/shell-roboshop"
-LOGS_FILE="$LOGS_FOLDER/redis.log"
+LOGS_FILE="$LOGS_FOLDER/$0.log"
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
@@ -24,15 +24,13 @@ VALIDATE(){
     fi
 }
 
-dnf install mysql-server -y
-VALIDATE $? "Installing MySQL Server"
+dnf install mysql-server -y &>>$LOGS_FILE
+VALIDATE $? "Install MySQL server"
 
 systemctl enable mysqld &>>$LOGS_FILE
-VALIDATE $? "Enabling MySQL Service"    
+systemctl start mysqld  
+VALIDATE $? "Enable and start mysql"
 
-systemctl start mysqld &>>$LOGS_FILE
-VALIDATE $? "Starting MySQL Service"
-
-mysql_secure_installation --set-root-pass RoboShop@123 &>>$LOGS_FILE
-VALIDATE $? "Setting MySQL root password"
- 
+# get the password from user
+mysql_secure_installation --set-root-pass RoboShop@1
+VALIDATE $? "Setup root password"

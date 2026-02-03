@@ -8,7 +8,7 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
 SCRIPT_DIR=$PWD
-MONGODB_HOST=mongodb.daws88s.online
+MONGODB_HOST=mongodb.devopspractice08.online
 
 if [ $USERID -ne 0 ]; then
     echo -e "$R Please run this script with root user access $N" | tee -a $LOGS_FILE
@@ -68,19 +68,3 @@ systemctl daemon-reload
 systemctl enable user  &>>$LOGS_FILE
 systemctl start user
 VALIDATE $? "Starting and enabling user"
-
-cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
-dnf install mongodb-mongosh -y &>>$LOGS_FILE
-
-INDEX=$(mongosh --host $MONGODB_HOST --quiet  --eval 'db.getMongo().getDBNames().indexOf("user")')
-
-if [ $INDEX -le 0 ]; then
-    mongosh --host $MONGODB_HOST </app/db/master-data.js
-    VALIDATE $? "Loading products"
-else
-    echo -e "Products already loaded ... $Y SKIPPING $N"
-fi
-
-
-systemctl restart user
-VALIDATE $? "Restarting user"

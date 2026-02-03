@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 USERID=$(id -u)
@@ -9,8 +8,7 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
 SCRIPT_DIR=$PWD
-REDIS_HOST=redis.daws88s.online
-MONGODB_HOST=mongodb.daws88s.online
+MONGODB_HOST=mysql.devopspractice08.online
 
 if [ $USERID -ne 0 ]; then
     echo -e "$R Please run this script with root user access $N" | tee -a $LOGS_FILE
