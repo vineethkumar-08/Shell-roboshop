@@ -62,6 +62,9 @@ VALIDATE $? "Moving and Renaming shipping"
 cp $SCRIPT_DIR/shipping.service /etc/systemd/system/shipping.service
 VALIDATE $? "Created systemctl service"
 
+systemctl daemon-reload &>>$LOGS_FILE
+VALIDATE $? "Reloading systemd"
+
 dnf install mysql -y  &>>$LOGS_FILE
 VALIDATE $? "Installing MySQL"
 
@@ -69,7 +72,9 @@ mysql -h $MYSQL_HOST -uroot -pRoboShop@1 -e 'use cities'
 if [ $? -ne 0 ]; then
 
     mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/schema.sql &>>$LOGS_FILE
+        VALIDATE $? "Creating schema in MySQL"
     mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/app-user.sql &>>$LOGS_FILE
+    VALIDATE $? "Creating application user in MySQL"
     mysql -h $MYSQL_HOST -uroot -pRoboShop@1 < /app/db/master-data.sql &>>$LOGS_FILE
     VALIDATE $? "Loaded data into MySQL"
 else
