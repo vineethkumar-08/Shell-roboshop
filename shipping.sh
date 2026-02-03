@@ -64,3 +64,5 @@ VALIDATE $? "Building shipping code"
 mv target/shipping-1.0.jar shipping.jar 
 VALIDATE $? "Renaming shipping jar file"
 
+cp $SCRIPT_DIR/shipping.service /etc/systemd/system/shipping.service
+VALIDATE $? "Created systemctl service"
