@@ -8,6 +8,8 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
 SCRIPT_DIR=$PWD
+MYSQL_HOST=mysql.devopspractice08.online
+
 if [ $USERID -ne 0 ]; then
     echo -e "$R Please run this script with root user access $N" | tee -a $LOGS_FILE
     exit 1
@@ -24,36 +26,50 @@ VALIDATE(){
     fi
 }
 
-dnf install python3 gcc python3-devel -y &>>$LOGS_FILE
+dnf install python3 gcc python3-devel -y
 VALIDATE $? "Installing Python3 and dependencies"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop
-VALIDATE $? "Adding roboshop user"
+id roboshop &>>$LOGS_FILE
+if [ $? -ne 0 ]; then
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOGS_FILE
+    VALIDATE $? "Creating system user"
+else
+    echo -e "Roboshop user already exist ... $Y SKIPPING $N"
+fi
 
-mkdir /app &>>$LOGS_FILE
-VALIDATE $? "Creating application directory"
+mkdir -p /app 
+VALIDATE $? "Creating app directory"
 
-curl -L -o /tmp/payment.zip https://roboshop-artifacts.s3.amazonaws.com/payment-v3.zip 
-VALIDATE $? "Downloading payment service code"
+curl -o /tmp/payments.zip https://roboshop-artifacts.s3.amazonaws.com/payments-v3.zip  &>>$LOGS_FILE
+VALIDATE $? "Downloading payments code"
 
-cd /app 
-VALIDATE $? "Moving to application directory"
+cd /app
+VALIDATE $? "Moving to app directory"
 
-unzip /tmp/payment.zip
-VALIDATE $? "Extracting payment service code"
+rm -rf /app/*
+VALIDATE $? "Removing existing code"
+
+unzip /tmp/payments.zip &>>$LOGS_FILE
+VALIDATE $? "Uzip payments code"
 
 cd /app 
 pip3 install -r requirements.txt &>>$LOGS_FILE
-VALIDATE $? "Installing payment service dependencies"
+VALIDATE $? "Installing Python dependencies"
 
-
-CP $SCRIPT_DIR/payment.service /etc/systemd/system/payment.service
-VALIDATE $? "Creating systemd service file for payment"
+cp $SCRIPT_DIR/payments.service /etc/systemd/system/payments.service
+VALIDATE $? "Copying systemd service file"
 
 systemctl daemon-reload &>>$LOGS_FILE
-VALIDATE $? "Reloading systemd"
+VALIDATE $? "Reloading systemd"     
 
-systemctl enable payment &>>$LOGS_FILE
-VALIDATE $? "Enabling payment service"
-systemctl start payment &>>$LOGS_FILE
-VALIDATE $? "Starting payment service"
+systemctl enable payments &>>$LOGS_FILE
+VALIDATE $? "Enabling payments service" 
+
+systemctl start payments &>>$LOGS_FILE
+VALIDATE $? "Starting payments service"
+
+
+
+
+
+
