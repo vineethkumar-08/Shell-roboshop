@@ -8,7 +8,7 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
 SCRIPT_DIR=$PWD
-MYSQL_HOST=mysql.devopspractice08.online
+MYSQL_HOST=mysql.daws88s.online
 
 if [ $USERID -ne 0 ]; then
     echo -e "$R Please run this script with root user access $N" | tee -a $LOGS_FILE
@@ -26,22 +26,22 @@ VALIDATE(){
     fi
 }
 
-dnf install python3 gcc python3-devel -y
-VALIDATE $? "Installing Python3 and dependencies"
+dnf install python3 gcc python3-devel -y &>>$LOGS_FILE
+VALIDATE $? "Installing Python"
 
 id roboshop &>>$LOGS_FILE
 if [ $? -ne 0 ]; then
     useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOGS_FILE
-    VALIDATE $? "Creating roboshop user"
+    VALIDATE $? "Creating system user"
 else
-    echo -e "roboshop user already exists ... SKIPPING"
+    echo -e "Roboshop user already exist ... $Y SKIPPING $N"
 fi
 
 mkdir -p /app 
 VALIDATE $? "Creating app directory"
 
-curl -o /tmp/payments.zip https://roboshop-artifacts.s3.amazonaws.com/payments-v3.zip  &>>$LOGS_FILE
-VALIDATE $? "Downloading payments code"
+curl -o /tmp/payment.zip https://roboshop-artifacts.s3.amazonaws.com/payment-v3.zip  &>>$LOGS_FILE
+VALIDATE $? "Downloading payment code"
 
 cd /app
 VALIDATE $? "Moving to app directory"
@@ -49,30 +49,17 @@ VALIDATE $? "Moving to app directory"
 rm -rf /app/*
 VALIDATE $? "Removing existing code"
 
-dnf install unzip -y &>>$LOGS_FILE
-VALIDATE $? "Installing unzip"
-
-unzip /tmp/payments.zip &>>$LOGS_FILE
-VALIDATE $? "Uzip payments code"
+unzip /tmp/payment.zip &>>$LOGS_FILE
+VALIDATE $? "Uzip payment code"
 
 cd /app 
 pip3 install -r requirements.txt &>>$LOGS_FILE
-VALIDATE $? "Installing Python dependencies"
+VALIDATE $? "Installing dependencies"
 
-cp $SCRIPT_DIR/payments.service /etc/systemd/system/payments.service
-VALIDATE $? "Copying systemd service file"
+cp $SCRIPT_DIR/payment.service /etc/systemd/system/payment.service
+VALIDATE $? "Created systemctl service"
 
-systemctl daemon-reload &>>$LOGS_FILE
-VALIDATE $? "Reloading systemd"     
-
-systemctl enable payments &>>$LOGS_FILE
-VALIDATE $? "Enabling payments service" 
-
-systemctl start payments &>>$LOGS_FILE
-VALIDATE $? "Starting payments service"
-
-
-
-
-
-
+systemctl daemon-reload
+systemctl enable payment &>>$LOGS_FILE
+systemctl start payment
+VALIDATE $? "Enabled and started payment"
