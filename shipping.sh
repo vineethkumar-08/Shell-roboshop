@@ -28,17 +28,30 @@ VALIDATE(){
 dnf install maven -y &>>$LOGS_FILE
 VALIDATE $? "Installing Maven"
 
-useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOGS_FILE
-VALIDATE $? "Creating system user"
+id roboshop &>>$LOGS_FILE
+if [ $? -ne 0 ]; then
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system shipping" roboshop &>>$LOGS_FILE
+    VALIDATE $? "Creating system shipping"
+else
+    echo -e "Roboshop shipping already exist ... $Y SKIPPING $N"
+fi 
 
-mkdir /app 
+shippingadd --system --home /app --shell /sbin/nologin --comment "roboshop system shipping" roboshop &>>$LOGS_FILE
+VALIDATE $? "Creating system shipping"
+
+
+mkdir -p /app 
 VALIDATE $? "Creating app directory"
 
-curl -L -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip &>>$LOGS_FILE
+curl -o /tmp/shipping.zip https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip  &>>$LOGS_FILE
 VALIDATE $? "Downloading shipping code"
 
-cd /app 
+cd /app
 VALIDATE $? "Moving to app directory"
+
+rm -rf /app/*
+VALIDATE $? "Removing existing code"
+
 
 unzip /tmp/shipping.zip
 VALIDATE $? "Unzipping shipping code"
